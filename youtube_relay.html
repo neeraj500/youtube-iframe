@@ -1,54 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <style>
-        /* Styles to ensure the player fills the space without scrolling */
-        html, body, iframe { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            overflow: hidden; 
-        }
-    </style>
-    <title>Video Player Relay</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>YouTube Video</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    #player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  </style>
 </head>
 <body>
-    <div id="player-container" style="width: 100%; height: 100%;"></div>
-
-    <script>
-        // Function to extract the 'v' (video ID) query parameter
-        function getParameterByName(name, url = window.location.href) {
-            name = name.replace(/[\[\]]/g, '\\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
-
-    const videoId = getParameterByName('v');
-
-    if (videoId) {
-        // Use the standard YouTube embed URL
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&enablejsapi=1&playsinline=1`;
-        
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share');
-        iframe.setAttribute('allowfullscreen', 'true');
-        
-        document.getElementById('player-container').appendChild(iframe);
-    }
-    
-    // 🎯 NEW FIX: Force the body/HTML to take the full viewport height/width
-    // This is often needed when loading HTML content via source={{uri}} in React Native
-    document.documentElement.style.height = '100%';
-    document.body.style.height = '100%';
-    document.body.style.width = '100%';
-    </script>
+  <iframe
+    id="player"
+    allowfullscreen
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+  <script>
+    (function() {
+      // Parse URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      // Get video ID (required)
+      const videoId = urlParams.get('v');
+      if (!videoId) {
+        document.body.innerHTML = '<div style="color: white; padding: 20px; text-align: center;">Error: Missing video ID parameter (?v=VIDEO_ID)</div>';
+        return;
+      }
+      // Get optional parameters with defaults
+      const autoplay = urlParams.get('autoplay') || '0';
+      const loop = urlParams.get('loop') || '0';
+      const mute = urlParams.get('mute') || '0';
+      const playlist = urlParams.get('playlist') || videoId;
+      const controls = urlParams.get('controls') || '1';
+      const rel = urlParams.get('rel') || '0';
+      const modestbranding = urlParams.get('modestbranding') || '1';
+      const playsinline = urlParams.get('playsinline') || '1';
+      // Build YouTube embed URL parameters
+      const embedParams = new URLSearchParams({
+        autoplay: autoplay,
+        controls: controls,
+        rel: rel,
+        modestbranding: modestbranding,
+        playsinline: playsinline,
+        enablejsapi: '1',
+        origin: window.location.origin
+      });
+      // Add loop and playlist if loop is enabled
+      if (loop === '1') {
+        embedParams.append('loop', '1');
+        embedParams.append('playlist', playlist);
+      }
+      // Add mute if enabled
+      if (mute === '1') {
+        embedParams.append('mute', '1');
+      }
+      // Construct final URL
+      const embedUrl = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?${embedParams.toString()}`;
+      // Set iframe src
+      document.getElementById('player').src = embedUrl;
+    })();
+  </script>
 </body>
 </html>
