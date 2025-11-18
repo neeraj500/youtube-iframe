@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <style>
         /* Styles to ensure the player fills the space without scrolling */
@@ -30,19 +30,25 @@
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
         }
 
-        const videoId = getParameterByName('v');
+    const videoId = getParameterByName('v');
 
-        if (videoId) {
-            // Use the standard YouTube embed URL
-            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&enablejsapi=1&playsinline=1`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share');
-            iframe.setAttribute('allowfullscreen', 'true');
-            
-            document.getElementById('player-container').appendChild(iframe);
-        }
+    if (videoId) {
+        // Use the standard YouTube embed URL
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&enablejsapi=1&playsinline=1`;
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share');
+        iframe.setAttribute('allowfullscreen', 'true');
+        
+        document.getElementById('player-container').appendChild(iframe);
+    }
+    
+    // 🎯 NEW FIX: Force the body/HTML to take the full viewport height/width
+    // This is often needed when loading HTML content via source={{uri}} in React Native
+    document.documentElement.style.height = '100%';
+    document.body.style.height = '100%';
+    document.body.style.width = '100%';
     </script>
 </body>
 </html>
